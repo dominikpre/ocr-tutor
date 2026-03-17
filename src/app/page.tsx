@@ -1,31 +1,43 @@
 import Link from "next/link";
 
-import { ContentContainer } from "@/components/content-container";
-import { controlClassName } from "@/components/control-styles";
-import { ScaffoldBox } from "@/components/scaffold-box";
+import { SubmissionsList } from "@/features/submissions/submissions-list";
+import { listSubmissions } from "@/lib/api/submissions";
+import { buttonClassName } from "@/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 
-export default function Home() {
+export default async function HomePage() {
+  const submissions = await listSubmissions();
+
   return (
-    <ContentContainer className="space-y-6 py-10">
-      <section className="space-y-3">
-        <h1 className="text-3xl font-semibold sm:text-4xl">OCRTutor MVP</h1>
-        <p className="max-w-2xl text-sm leading-6 text-muted">
-          Minimal scaffold for handwriting upload, OCR processing, and review.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/upload" className={controlClassName()}>
-            Upload
-          </Link>
-          <Link href="/documents" className={controlClassName()}>
-            Review
-          </Link>
-        </div>
-      </section>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Minimal OCR tutor MVP</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm leading-6 text-muted">
+            Upload handwritten images into a collection, view submissions, and
+            open a detail page with the original image, overlays, and corrected
+            text.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/upload" className={buttonClassName()}>
+              Upload files
+            </Link>
+            <Link
+              href="/submissions"
+              className={buttonClassName({ variant: "secondary" })}
+            >
+              View submissions
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <ScaffoldBox title="TODO: workflow explainer" />
-        <ScaffoldBox title="TODO: OCR / feedback preview" />
-      </div>
-    </ContentContainer>
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Recent submissions</h2>
+        <SubmissionsList submissions={submissions} />
+      </section>
+    </div>
   );
 }

@@ -1,34 +1,44 @@
-import { FileList } from "@/components/file-list";
-import { ContentContainer } from "@/components/content-container";
-import { controlClassName } from "@/components/control-styles";
-import { ScaffoldBox } from "@/components/scaffold-box";
-import { templateFiles } from "@/lib/mock-data";
+import Link from "next/link";
 
-export default function UploadPage() {
+import { UploadForm } from "@/features/upload/upload-form";
+import { listCollections } from "@/lib/api/submissions";
+import { buttonClassName } from "@/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+
+export default async function UploadPage() {
+  const collections = await listCollections();
+
   return (
-    <ContentContainer className="space-y-6 py-10">
-      <section className="space-y-3">
-        <h1 className="text-3xl font-semibold sm:text-4xl">Upload</h1>
-        <p className="text-sm leading-6 text-muted">
-          Choose a file. Upload handling is still TODO.
-        </p>
-        <label
-          htmlFor="page-upload"
-          className={controlClassName("cursor-pointer")}
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Upload</h1>
+          <p className="mt-1 text-sm text-muted">
+            Add one or more image files to an existing collection or create a
+            new one.
+          </p>
+        </div>
+        <Link
+          href="/submissions"
+          className={buttonClassName({ variant: "secondary" })}
         >
-          Choose file
-        </label>
-        <input
-          id="page-upload"
-          type="file"
-          accept="image/*,.pdf"
-          className="sr-only"
-        />
-      </section>
+          View submissions
+        </Link>
+      </div>
 
-      <ScaffoldBox title="TODO: uploaded files">
-        <FileList files={templateFiles} />
-      </ScaffoldBox>
-    </ContentContainer>
+      <UploadForm collections={collections} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Current scope</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm leading-6 text-muted">
+            This page only handles frontend file selection and mock upload
+            requests. Processing and persistence come later.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
