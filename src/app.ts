@@ -92,7 +92,7 @@ export async function buildApp() {
   // Configure multipart parsing limits once at the framework edge.
   await app.register(multipart, {
     limits: {
-      files: 20,
+      files: config.maxFileCount,
       fileSize: config.maxFileSizeBytes,
     },
   });

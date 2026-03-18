@@ -38,6 +38,7 @@ export const config = {
   frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
   // Cap upload size early at the Fastify multipart layer.
   maxFileSizeBytes: getNumber(process.env.MAX_FILE_SIZE_BYTES, 10 * 1024 * 1024),
+  maxFileCount: getNumber(process.env.MAX_FILE_COUNT, 20),
   port,
   // The public base URL is used when building absolute image URLs for the
   // frontend response payloads.
