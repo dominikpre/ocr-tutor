@@ -1,0 +1,24 @@
+# Local development Postgres instance for Prisma and the Fastify service.
+services:
+  postgres:
+    # The Alpine variant keeps the image small while still being production-like
+    # enough for local schema work.
+    image: postgres:16-alpine
+    container_name: ocr-tutor-postgres
+    restart: unless-stopped
+    environment:
+      # These values match .env.example so the service can connect without extra
+      # Docker-specific configuration.
+      POSTGRES_DB: ocr_tutor
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      # Expose the default Postgres port to the host for Prisma CLI access.
+      - "5432:5432"
+    volumes:
+      # Persist data across container restarts.
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  # Named volume for database persistence.
+  postgres-data:

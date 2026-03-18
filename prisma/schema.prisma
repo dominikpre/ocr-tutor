@@ -1,0 +1,63 @@
+// Generate the JavaScript Prisma client consumed by src/prisma.ts.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// The MVP uses Postgres for real persistence from day one.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Keep the future status lifecycle in the schema even though the MVP only
+// writes UPLOADED today.
+enum SubmissionStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+}
+
+// A collection is the user-facing grouping chosen on upload, for example
+// "Week 3 homework" or "History reflections".
+model Collection {
+  // Prisma generates cuid strings so the API can stay on string ids everywhere.
+  id          String       @id @default(cuid())
+  // Collection names are unique after trimming in the route handler.
+  name        String       @unique
+  // One collection can own many uploaded submission rows.
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// A submission represents one uploaded image file plus the metadata the
+// frontend needs to render the list and detail pages.
+model Submission {
+  id           String           @id @default(cuid())
+  // Human-friendly title derived from the original filename stem.
+  title        String
+  // Foreign key back to the collection grouping.
+  collectionId String
+  collection   Collection       @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+  // Original client filename kept for display purposes.
+  fileName     String
+  // Raw mime type reported by the multipart upload.
+  mimeType     String
+  // Raw byte size is useful for later observability and validation changes.
+  sizeBytes    Int
+  // Unique relative path of the stored file under the uploads directory.
+  storagePath  String           @unique
+  // Saved so the frontend can render the image with the correct aspect ratio.
+  imageWidth   Int
+  imageHeight  Int
+  // Starts as UPLOADED and leaves room for the later OCR pipeline states.
+  status       SubmissionStatus @default(UPLOADED)
+  // submittedAt is the user-facing timestamp shown in the UI.
+  submittedAt  DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Common lookup patterns used by the API.
+  @@index([collectionId])
+  @@index([submittedAt])
+}

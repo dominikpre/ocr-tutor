@@ -1,0 +1,2 @@
+# Prisma uses this to remember which database provider the migrations target.
+provider = "postgresql"
