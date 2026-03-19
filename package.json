@@ -3,11 +3,11 @@
   "private": true,
   "packageManager": "pnpm@10.8.1",
   "scripts": {
-    "dev:web": "pnpm --filter @ocr-tutor/web dev",
-    "dev:api": "pnpm --filter @ocr-tutor/api dev",
+    "dev:web": "pnpm --filter ocr-tutor-demo dev",
+    "dev:api": "pnpm --filter ocr-tutor-service dev",
     "build": "pnpm -r --if-present build",
     "lint": "pnpm -r --if-present lint",
-    "db:up": "pnpm --filter @ocr-tutor/api db:up",
-    "db:down": "pnpm --filter @ocr-tutor/api db:down"
+    "db:up": "pnpm --filter ocr-tutor-service db:up",
+    "db:down": "pnpm --filter ocr-tutor-service db:down"
   }
 }
