@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    // Modern Node runtime target for the service code.
+    "target": "ES2022",
+    // Match the package's ESM setup and keep import/export behavior predictable.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    // Emit compiled files into dist/ while reading source from src/.
+    "outDir": "dist",
+    "rootDir": "src",
+    // Keep the service strict so API shapes and null cases stay explicit.
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    // Force each file to be independently valid ESM/TS, which helps tooling.
+    "isolatedModules": true,
+    // Make array/object access more defensive when indexing dynamic values.
+    "noUncheckedIndexedAccess": true,
+    // This is a backend project, so only Node globals/types are needed.
+    "types": ["node"]
+  },
+  // Only compile the handwritten service source.
+  "include": ["src/**/*.ts"]
+}
