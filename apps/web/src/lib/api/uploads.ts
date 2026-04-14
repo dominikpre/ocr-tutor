@@ -1,19 +1,23 @@
-import { mockApi } from "@/lib/api/client";
-import type { UploadRequest, UploadResponse } from "@/lib/types/api";
+import { apiFetch } from "@/lib/api/client";
+import type { UploadResponse } from "@ocr-tutor/contracts";
+
+type CreateUploadInput = {
+  collectionName: string;
+  files: File[];
+};
 
 export async function createUpload(
-  request: UploadRequest,
+  request: CreateUploadInput,
 ): Promise<UploadResponse> {
-  const response = await mockApi<UploadResponse>(
-    () => ({
-      collectionName: request.collectionName,
-      filesReceived: request.files.length,
-      status: "uploaded",
-      persisted: false,
-      message: `Accepted ${request.files.length} file${request.files.length === 1 ? "" : "s"} for "${request.collectionName}".`,
-    }),
-    300,
-  );
+  const formData = new FormData();
+  formData.append("collectionName", request.collectionName);
 
-  return response.data;
+  for (const file of request.files) {
+    formData.append("files", file);
+  }
+
+  return apiFetch<UploadResponse>("/api/submissions", {
+    method: "POST",
+    body: formData,
+  });
 }

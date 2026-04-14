@@ -1,7 +1,7 @@
 import Link from "next/link";
+import type { Submission } from "@ocr-tutor/contracts";
 
 import { SubmissionsListItem } from "@/features/submissions/submissions-list-item";
-import type { Submission } from "@/lib/types/submission";
 import { buttonClassName } from "@/ui/button";
 import { EmptyState } from "@/ui/empty-state";
 

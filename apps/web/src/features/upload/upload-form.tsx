@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { UploadResponse } from "@ocr-tutor/contracts";
 
 import { ImagePreview } from "@/features/upload/image-preview";
 import { UploadDropzone } from "@/features/upload/upload-dropzone";
 import { UploadSubmit } from "@/features/upload/upload-submit";
 import { createUpload } from "@/lib/api/uploads";
-import type { UploadResponse } from "@/lib/types/api";
 import { buttonClassName } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Input, inputClassName } from "@/ui/input";
@@ -16,14 +17,26 @@ type UploadFormProps = {
 };
 
 export function UploadForm({ collections }: UploadFormProps) {
-  const [selectedCollection, setSelectedCollection] = useState(
-    collections[0] ?? "",
-  );
+  const router = useRouter();
+  const [availableCollections, setAvailableCollections] = useState(collections);
+  const [selectedCollection, setSelectedCollection] = useState(collections[0] ?? "");
   const [newCollectionName, setNewCollectionName] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState("");
   const [result, setResult] = useState<UploadResponse | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setAvailableCollections(collections);
+    setSelectedCollection((currentSelection) => {
+      if (currentSelection.length > 0) {
+        return currentSelection;
+      }
+
+      return collections[0] ?? "";
+    });
+  }, [collections]);
 
   useEffect(() => {
     if (files.length === 0) {
@@ -71,20 +84,32 @@ export function UploadForm({ collections }: UploadFormProps) {
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
       const nextResult = await createUpload({
         collectionName,
-        files: files.map((file) => ({
-          name: file.name,
-          size: file.size,
-          type: file.type || "image/*",
-        })),
+        files,
       });
 
       setResult(nextResult);
+      setAvailableCollections((currentCollections) => {
+        if (currentCollections.includes(collectionName)) {
+          return currentCollections;
+        }
+
+        return [...currentCollections, collectionName].sort((left, right) =>
+          left.localeCompare(right),
+        );
+      });
+      setSelectedCollection(collectionName);
       setFiles([]);
       setNewCollectionName("");
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Upload failed unexpectedly.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -104,8 +129,12 @@ export function UploadForm({ collections }: UploadFormProps) {
                   value={selectedCollection}
                   onChange={(event) => setSelectedCollection(event.currentTarget.value)}
                   className={inputClassName()}
+                  disabled={availableCollections.length === 0}
                 >
-                  {collections.map((collection) => (
+                  {availableCollections.length === 0 ? (
+                    <option value="">No collections yet</option>
+                  ) : null}
+                  {availableCollections.map((collection) => (
                     <option key={collection} value={collection}>
                       {collection}
                     </option>
@@ -158,6 +187,7 @@ export function UploadForm({ collections }: UploadFormProps) {
               <button
                 type="button"
                 onClick={() => {
+                  setErrorMessage("");
                   setFiles([]);
                   setResult(null);
                 }}
@@ -166,6 +196,10 @@ export function UploadForm({ collections }: UploadFormProps) {
                 Clear
               </button>
             </div>
+
+            {errorMessage ? (
+              <p className="text-sm text-red-600">{errorMessage}</p>
+            ) : null}
           </form>
         </CardContent>
       </Card>
@@ -177,9 +211,7 @@ export function UploadForm({ collections }: UploadFormProps) {
       {result ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm">
-              {result.message} This is still a mock frontend request.
-            </p>
+            <p className="text-sm">{result.message}</p>
           </CardContent>
         </Card>
       ) : null}

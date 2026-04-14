@@ -1,6 +1,6 @@
 import Link from "next/link";
+import type { Submission } from "@ocr-tutor/contracts";
 
-import type { Submission } from "@/lib/types/submission";
 import { formatDate } from "@/lib/utils/format-date";
 import { buttonClassName } from "@/ui/button";
 import { Card } from "@/ui/card";

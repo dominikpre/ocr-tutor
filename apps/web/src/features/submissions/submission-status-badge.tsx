@@ -1,4 +1,4 @@
-import type { SubmissionStatus } from "@/lib/types/submission";
+import type { SubmissionStatus } from "@ocr-tutor/contracts";
 import { Badge } from "@/ui/badge";
 
 type SubmissionStatusBadgeProps = {

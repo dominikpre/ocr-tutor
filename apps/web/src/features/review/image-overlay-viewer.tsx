@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import type { Submission } from "@ocr-tutor/contracts";
 
 import { OverlayLayer } from "@/features/review/overlay-layer";
-import type { Overlay } from "@/lib/types/overlay";
-import type { SubmissionImage } from "@/lib/types/submission";
 import { cn } from "@/lib/utils/cn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 
 type ImageOverlayViewerProps = {
-  image: SubmissionImage;
-  overlays: Overlay[];
+  image: Submission["image"];
+  overlays: Submission["overlays"];
 };
 
 export function ImageOverlayViewer({
@@ -83,7 +82,7 @@ export function ImageOverlayViewer({
               >
                 <p className="text-sm font-medium">{overlay.label}</p>
                 <p className="mt-1 text-sm text-muted">
-                  {overlay.comment ?? "No annotation note provided."}
+                  {overlay.comment ?? "No note provided."}
                 </p>
               </button>
             );
