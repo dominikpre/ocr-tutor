@@ -1,4 +1,10 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) frontend for the OCR Tutor MVP.
+
+## Service URL
+
+The app reads the backend base URL from `NEXT_PUBLIC_API_BASE_URL`. The
+committed `.env.example` points to the local Fastify service at
+`http://localhost:4000`.
 
 ## Getting Started
 

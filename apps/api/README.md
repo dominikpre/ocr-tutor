@@ -1,6 +1,6 @@
-# ocr-tutor-service
+# OCR Tutor API
 
-Minimal Fastify + Prisma service for the OCR Tutor MVP.
+Minimal Fastify + Prisma API for the OCR Tutor MVP.
 
 ## Scripts
 
@@ -13,8 +13,15 @@ Minimal Fastify + Prisma service for the OCR Tutor MVP.
 
 ## Environment
 
-The service reads configuration from `.env`. The committed `.env.example`
-contains the default local development values.
+The service reads configuration from environment variables. A `.env` file is
+optional for local convenience only.
+
+If no environment variables are present, the service falls back to the local
+development defaults documented in `.env.example`, including the Postgres
+connection string that matches `compose.yaml`.
+
+The Prisma scripts use the same local Postgres default when `DATABASE_URL` is
+unset.
 
 ## API
 

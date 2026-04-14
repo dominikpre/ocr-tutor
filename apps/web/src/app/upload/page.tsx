@@ -34,8 +34,8 @@ export default async function UploadPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-6 text-muted">
-            This page only handles frontend file selection and mock upload
-            requests. Processing and persistence come later.
+            This page stores uploaded images and metadata now. OCR, corrections,
+            and overlays still come later.
           </p>
         </CardContent>
       </Card>

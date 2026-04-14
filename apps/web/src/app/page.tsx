@@ -16,9 +16,9 @@ export default async function HomePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm leading-6 text-muted">
-            Upload handwritten images into a collection, view submissions, and
-            open a detail page with the original image, overlays, and corrected
-            text.
+            Upload handwritten images into a collection, view stored
+            submissions, and open a detail page with the original image. OCR
+            results and corrections are not part of this MVP yet.
           </p>
           <div className="flex flex-wrap gap-2">
             <Link href="/upload" className={buttonClassName()}>
