@@ -111,7 +111,7 @@ export function UploadDropzone({ onAddFiles }: UploadDropzoneProps) {
             Or pick one or more handwritten images from your device.
           </p>
           {rejectionMessage ? (
-            <p aria-live="polite" className="text-sm text-[color:var(--danger)]">
+            <p aria-live="polite" className="text-sm text-red-600">
               {rejectionMessage}
             </p>
           ) : null}

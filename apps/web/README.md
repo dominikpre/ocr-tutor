@@ -1,42 +1,32 @@
-This is a [Next.js](https://nextjs.org) frontend for the OCR Tutor MVP.
+# OCR Tutor Web
 
-## Service URL
+Next.js frontend for the OCR Tutor workspace.
 
-The app reads the backend base URL from `NEXT_PUBLIC_API_BASE_URL`. The
-committed `.env.example` points to the local Fastify service at
-`http://localhost:4000`.
+## Workspace Commands
 
-## Getting Started
+- From the monorepo root: `pnpm dev:web`
+- From `apps/web`: `pnpm dev`
+- Production build: `pnpm --filter @ocr-tutor/web build`
+- Lint: `pnpm --filter @ocr-tutor/web lint`
 
-First, run the development server:
+## Environment
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The app reads the backend base URL from `NEXT_PUBLIC_API_BASE_URL`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Start the API from the monorepo root with `pnpm dev:api`.
+2. Start the web app with `pnpm dev:web`.
+3. Open [http://localhost:3000](http://localhost:3000).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If you prefer working from the package directory, run `pnpm dev` inside `apps/web`.
 
-## Learn More
+## Scope
 
-To learn more about Next.js, take a look at the following resources:
+- `/`: recent submissions overview
+- `/upload`: upload one or more image files into a collection
+- `/submissions`: list stored submissions
+- `/submissions/[id]`: submission detail with the stored original image
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+TODO: extend the scope to include the OCR pipeline and review overlays after the MVP is complete.
+Review overlays and corrected-text UI are intentionally not rendered yet; the backend contract remains in place for the upcoming producer.

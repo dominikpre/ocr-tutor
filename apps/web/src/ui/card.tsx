@@ -28,21 +28,7 @@ export function CardTitle({
   return <h2 className={cn("text-xl font-semibold", className)} {...props} />;
 }
 
-export function CardDescription({
-  className,
-  ...props
-}: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm leading-6 text-muted", className)} {...props} />;
-}
-
 export function CardContent({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-6 pb-6", className)} {...props} />;
-}
-
-export function CardFooter({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>) {

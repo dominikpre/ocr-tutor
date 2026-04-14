@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { fetchJson } from "@/lib/api/client";
 import type { UploadResponse } from "@ocr-tutor/contracts";
 
 type CreateUploadInput = {
@@ -16,7 +16,7 @@ export async function createUpload(
     formData.append("files", file);
   }
 
-  return apiFetch<UploadResponse>("/api/submissions", {
+  return fetchJson<UploadResponse>("/api/submissions", {
     method: "POST",
     body: formData,
   });

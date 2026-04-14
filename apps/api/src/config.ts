@@ -23,7 +23,7 @@ export const config = {
     : 10 * 1024 * 1024,
   maxFileCount: process.env.MAX_FILE_COUNT
     ? Number(process.env.MAX_FILE_COUNT)
-    : 20,
+    : 50,
   port,
   // The public base URL is used when building absolute image URLs for the
   // frontend response payloads.

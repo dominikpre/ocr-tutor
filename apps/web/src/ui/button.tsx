@@ -2,8 +2,8 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils/cn";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonSize = "sm" | "md";
 
 type ButtonClassNameOptions = {
   className?: string;
@@ -19,13 +19,11 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary: "border-black bg-black text-white hover:bg-[#333333]",
   secondary: "bg-white text-foreground hover:bg-[color:var(--surface-muted)]",
   ghost: "border-transparent bg-transparent text-foreground hover:bg-[color:var(--surface-muted)]",
-  danger: "border-[color:var(--danger)] bg-[color:var(--danger)] text-white hover:opacity-90",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "h-9 px-3 text-sm",
   md: "h-10 px-4 text-sm",
-  lg: "h-11 px-5 text-base",
 };
 
 export function buttonClassName({

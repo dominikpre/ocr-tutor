@@ -1,8 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CorrectedTextPanel } from "@/features/review/corrected-text-panel";
-import { ImageOverlayViewer } from "@/features/review/image-overlay-viewer";
 import { SubmissionStatusBadge } from "@/features/submissions/submission-status-badge";
 import { getSubmissionById } from "@/lib/api/submissions";
 import { formatDate } from "@/lib/utils/format-date";
@@ -49,22 +48,27 @@ export default async function SubmissionDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <ImageOverlayViewer
-          image={submission.image}
-          overlays={submission.overlays}
-        />
-        <CorrectedTextPanel value={submission.correctedText} />
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>Submission info</CardTitle>
+          <CardTitle>Original image</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted">
-          <p>Collection: {submission.collectionName}</p>
-          <p>File: {submission.fileName}</p>
-          <p>Submitted: {formatDate(submission.submittedAt)}</p>
+        <CardContent>
+          <div className="relative overflow-hidden rounded-md border border-border bg-[color:var(--surface-muted)]">
+            <div
+              className="relative"
+              style={{
+                aspectRatio: `${submission.image.width} / ${submission.image.height}`,
+              }}
+            >
+              <Image
+                src={submission.image.url}
+                alt={submission.image.alt}
+                fill
+                sizes="(max-width: 1024px) 100vw, 900px"
+                className="object-contain"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

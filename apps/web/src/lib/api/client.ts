@@ -11,10 +11,6 @@ export function buildApiUrl(path: string) {
   return new URL(path, `${getApiBaseUrl()}/`).toString();
 }
 
-type ApiFetchOptions = RequestInit & {
-  allowNotFound?: boolean;
-};
-
 function normalizeApiError(error: unknown) {
   if (error instanceof TypeError) {
     return new Error(
@@ -29,36 +25,37 @@ function normalizeApiError(error: unknown) {
   return new Error("Unexpected API request failure.");
 }
 
-export function apiFetch<T>(
-  path: string,
-  options: ApiFetchOptions & { allowNotFound: true },
-): Promise<T | null>;
-export function apiFetch<T>(path: string, options?: ApiFetchOptions): Promise<T>;
+async function buildApiError(response: Response) {
+  const payload = (await response.json().catch(() => null)) as
+    | { error?: string }
+    | null;
 
-export async function apiFetch<T>(
-  path: string,
-  options: ApiFetchOptions = {},
-): Promise<T | null> {
-  const { allowNotFound = false, ...init } = options;
-  let response: Response;
+  return new Error(payload?.error ?? `Request failed with ${response.status}.`);
+}
 
+export async function fetchApi(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
   try {
-    response = await fetch(buildApiUrl(path), init);
+    return await fetch(buildApiUrl(path), init);
   } catch (error) {
     throw normalizeApiError(error);
   }
+}
 
-  if (allowNotFound && response.status === 404) {
-    return null;
-  }
-
+export async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
-
-    throw new Error(payload?.error ?? `Request failed with ${response.status}.`);
+    throw await buildApiError(response);
   }
 
   return (await response.json()) as T;
+}
+
+export async function fetchJson<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetchApi(path, init);
+  return readJson<T>(response);
 }

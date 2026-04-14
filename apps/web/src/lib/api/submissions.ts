@@ -1,8 +1,8 @@
-import { apiFetch } from "@/lib/api/client";
+import { fetchApi, fetchJson, readJson } from "@/lib/api/client";
 import type { Submission } from "@ocr-tutor/contracts";
 
 export async function listSubmissions(): Promise<Submission[]> {
-  return apiFetch<Submission[]>("/api/submissions", {
+  return fetchJson<Submission[]>("/api/submissions", {
     cache: "no-store",
   });
 }
@@ -10,14 +10,19 @@ export async function listSubmissions(): Promise<Submission[]> {
 export async function getSubmissionById(
   id: string,
 ): Promise<Submission | null> {
-  return apiFetch<Submission>(`/api/submissions/${id}`, {
-    allowNotFound: true,
+  const response = await fetchApi(`/api/submissions/${id}`, {
     cache: "no-store",
   });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  return readJson<Submission>(response);
 }
 
 export async function listCollections(): Promise<string[]> {
-  return apiFetch<string[]>("/api/collections", {
+  return fetchJson<string[]>("/api/collections", {
     cache: "no-store",
   });
 }
