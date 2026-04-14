@@ -2,7 +2,8 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import fastify from "fastify";
 import fastifyStatic from "@fastify/static";
-import { SubmissionStatus } from "@prisma/client";
+import type { Submission, UploadResponse } from "@ocr-tutor/contracts";
+import { type Prisma } from "@prisma/client";
 
 import { config } from "./config.js";
 import { prisma } from "./prisma.js";
@@ -25,51 +26,48 @@ class HttpError extends Error {
   }
 }
 
-// Prisma stores enum values in uppercase, while the frontend contract uses the
-// original lowercase strings from the mocked domain model.
-function toApiStatus(status: SubmissionStatus) {
-  switch (status) {
-    case SubmissionStatus.COMPLETED:
-      return "completed";
-    case SubmissionStatus.PROCESSING:
-      return "processing";
-    default:
-      return "uploaded";
-  }
-}
-
-// Convert the database row into the exact response shape expected by the demo
-// frontend. OCR-related fields remain empty placeholders in this MVP.
-function toSubmissionResponse(
-  submission: {
-    id: string;
-    title: string;
-    fileName: string;
-    status: SubmissionStatus;
-    storagePath: string;
-    imageWidth: number;
-    imageHeight: number;
-    submittedAt: Date;
-    collection: {
-      name: string;
-    };
+const submissionResponseSelect = {
+  id: true,
+  title: true,
+  fileName: true,
+  status: true,
+  storagePath: true,
+  imageWidth: true,
+  imageHeight: true,
+  correctedText: true,
+  overlays: true,
+  submittedAt: true,
+  collection: {
+    select: {
+      name: true,
+    },
   },
-) {
+} satisfies Prisma.SubmissionSelect;
+
+// Convert the database row into the exact response shape expected by the web
+// app while trusting JSONB overlays written by the application.
+function serializeSubmission(
+  submission: Prisma.SubmissionGetPayload<{
+    select: typeof submissionResponseSelect;
+  }>,
+): Submission {
   return {
     id: submission.id,
     title: submission.title,
     collectionName: submission.collection.name,
     fileName: submission.fileName,
     submittedAt: submission.submittedAt.toISOString(),
-    status: toApiStatus(submission.status),
+    status: submission.status,
     image: {
       url: buildImageUrl(submission.storagePath),
       alt: buildImageAlt(submission.title),
       width: submission.imageWidth,
       height: submission.imageHeight,
     },
-    correctedText: "",
-    overlays: [],
+    correctedText: submission.correctedText,
+    overlays: Array.isArray(submission.overlays)
+      ? (submission.overlays as Submission["overlays"])
+      : [],
   };
 }
 
@@ -123,19 +121,13 @@ export async function buildApp() {
   // returns the frontend-ready domain objects sorted newest first.
   app.get("/api/submissions", async () => {
     const submissions = await prisma.submission.findMany({
-      include: {
-        collection: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      select: submissionResponseSelect,
       orderBy: {
         submittedAt: "desc",
       },
     });
 
-    return submissions.map(toSubmissionResponse);
+    return submissions.map(serializeSubmission);
   });
 
   // The detail endpoint reuses the same response mapper as the list endpoint,
@@ -146,20 +138,14 @@ export async function buildApp() {
       where: {
         id,
       },
-      include: {
-        collection: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      select: submissionResponseSelect,
     });
 
     if (!submission) {
       throw new HttpError(404, `Submission "${id}" was not found.`);
     }
 
-    return toSubmissionResponse(submission);
+    return serializeSubmission(submission);
   });
 
   // Accept one logical submission batch: a collection name plus one or more
@@ -270,13 +256,15 @@ export async function buildApp() {
 
       // The frontend upload panel expects an aggregate success response rather
       // than the full created records.
-      return reply.code(201).send({
+      const response: UploadResponse = {
         collectionName,
         filesReceived: fileCount,
         status: "uploaded",
         persisted: true,
         message: `Accepted ${fileCount} file${pluralSuffix} for "${collectionName}".`,
-      });
+      };
+
+      return reply.code(201).send(response);
     } catch (error) {
       // If validation or DB persistence fails, remove any files already written
       // for this request.

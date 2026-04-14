@@ -10,11 +10,11 @@ datasource db {
 }
 
 // Keep the future status lifecycle in the schema even though the MVP only
-// writes UPLOADED today.
+// writes uploaded today.
 enum SubmissionStatus {
-  UPLOADED
-  PROCESSING
-  COMPLETED
+  uploaded
+  processing
+  completed
 }
 
 // A collection is the user-facing grouping chosen on upload, for example
@@ -50,8 +50,12 @@ model Submission {
   // Saved so the frontend can render the image with the correct aspect ratio.
   imageWidth   Int
   imageHeight  Int
-  // Starts as UPLOADED and leaves room for the later OCR pipeline states.
-  status       SubmissionStatus @default(UPLOADED)
+  // OCR pipeline writes the cleaned-up transcription here when available.
+  correctedText String          @default("")
+  // Store review overlays as JSON until they warrant a dedicated table.
+  overlays      Json            @default("[]")
+  // Starts as uploaded and leaves room for the later OCR pipeline states.
+  status       SubmissionStatus @default(uploaded)
   // submittedAt is the user-facing timestamp shown in the UI.
   submittedAt  DateTime         @default(now())
   createdAt    DateTime         @default(now())
