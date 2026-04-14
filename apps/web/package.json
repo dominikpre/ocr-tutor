@@ -1,7 +1,11 @@
 {
-  "name": "ocr-tutor-demo",
+  "name": "@ocr-tutor/web",
   "version": "0.1.0",
   "private": true,
+  "ocrTutorCompatibility": {
+    "contractVersion": "1",
+    "api": "^0.1.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +13,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.1.7",
+    "@ocr-tutor/contracts": "workspace:*",
+    "next": "16.2.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
