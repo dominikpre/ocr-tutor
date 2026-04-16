@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 
-import { buttonClassName } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 
 type AppErrorPageProps = {
@@ -13,7 +11,7 @@ type AppErrorPageProps = {
   reset: () => void;
 };
 
-export default function AppErrorPage({ error, reset }: AppErrorPageProps) {
+export default function AppErrorPage({ error }: AppErrorPageProps) {
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -33,18 +31,7 @@ export default function AppErrorPage({ error, reset }: AppErrorPageProps) {
             {isApiError
               ? error.message
               : "Something went wrong while loading this page."}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => reset()} className={buttonClassName()}>
-              Retry
-            </button>
-            <Link
-              href="/"
-              className={buttonClassName({ variant: "secondary" })}
-            >
-              Back home
-            </Link>
-          </div>
+          </p>  
         </CardContent>
       </Card>
     </div>
