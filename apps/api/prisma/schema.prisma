@@ -15,6 +15,7 @@ enum SubmissionStatus {
   uploaded
   processing
   completed
+  failed
 }
 
 // A collection is the user-facing grouping chosen on upload, for example
@@ -56,6 +57,14 @@ model Submission {
   overlays      Json            @default("[]")
   // Starts as uploaded and leaves room for the later OCR pipeline states.
   status       SubmissionStatus @default(uploaded)
+  // Number of worker processing attempts for this submission.
+  ocrAttempts  Int              @default(0)
+  // Most recent worker failure message, if any.
+  ocrLastError String?
+  // Timestamp gating when this row becomes eligible for another OCR claim.
+  nextOcrAttemptAt DateTime?
+  // Timestamp when processing either succeeded or was terminally failed.
+  processedAt  DateTime?
   // submittedAt is the user-facing timestamp shown in the UI.
   submittedAt  DateTime         @default(now())
   createdAt    DateTime         @default(now())
@@ -64,4 +73,5 @@ model Submission {
   // Common lookup patterns used by the API.
   @@index([collectionId])
   @@index([submittedAt])
+  @@index([status, nextOcrAttemptAt, submittedAt])
 }

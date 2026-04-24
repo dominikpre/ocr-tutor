@@ -16,5 +16,9 @@ export function SubmissionStatusBadge({
     return <Badge variant="success">Completed</Badge>;
   }
 
+  if (status === "failed") {
+    return <Badge variant="danger">Failed</Badge>;
+  }
+
   return <Badge variant="neutral">Uploaded</Badge>;
 }

@@ -1,4 +1,8 @@
-export type SubmissionStatus = "uploaded" | "processing" | "completed";
+export type SubmissionStatus =
+  | "uploaded"
+  | "processing"
+  | "completed"
+  | "failed";
 
 export type SubmissionImage = {
   url: string;
