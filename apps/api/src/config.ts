@@ -24,6 +24,9 @@ export const config = {
   maxFileCount: process.env.MAX_FILE_COUNT
     ? Number(process.env.MAX_FILE_COUNT)
     : 50,
+  ocrWorkerBaseUrl: (
+    process.env.OCR_WORKER_BASE_URL ?? "http://127.0.0.1:4010"
+  ).replace(/\/$/, ""),
   port,
   // The public base URL is used when building absolute image URLs for the
   // frontend response payloads.

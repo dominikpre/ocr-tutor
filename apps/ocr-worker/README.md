@@ -28,3 +28,9 @@ object-storage migration only requires a new adapter.
 Retries are automatic and bounded by `OCR_MAX_ATTEMPTS`. Failed attempts are
 requeued after `OCR_RETRY_DELAY_MS`, then marked `failed` when the max attempt
 count is reached.
+
+Set `OCR_WORKER_MODE=manual` to disable automatic polling. In manual mode the
+worker keeps only its trigger endpoint open, and the API starts OCR when the
+submissions page calls the Run OCR action. The trigger endpoint defaults to
+`http://127.0.0.1:4010` and can be changed with `OCR_TRIGGER_HOST` and
+`OCR_TRIGGER_PORT`; point the API at it with `OCR_WORKER_BASE_URL`.

@@ -6,6 +6,7 @@ const defaultDatabaseUrl =
   "postgresql://postgres:postgres@localhost:5432/ocr_tutor?schema=public";
 
 type StorageDriver = "local" | "object";
+type WorkerMode = "poll" | "manual";
 
 function parseNumber(value: string | undefined, fallback: number) {
   if (!value) {
@@ -45,6 +46,16 @@ function resolveStorageDriver(rawValue: string | undefined): StorageDriver {
   );
 }
 
+function resolveWorkerMode(rawValue: string | undefined): WorkerMode {
+  if (rawValue === "manual" || rawValue === "poll" || rawValue === undefined) {
+    return rawValue ?? "poll";
+  }
+
+  throw new Error(
+    `Unsupported OCR_WORKER_MODE "${rawValue}". Use "poll" or "manual".`,
+  );
+}
+
 export const config = {
   claimBatchSize: parseNumber(process.env.OCR_CLAIM_BATCH_SIZE, 2),
   databaseUrl: process.env.DATABASE_URL ?? defaultDatabaseUrl,
@@ -59,8 +70,11 @@ export const config = {
   pollIntervalMs: parseNumber(process.env.OCR_POLL_INTERVAL_MS, 3_000),
   retryDelayMs: parseNumber(process.env.OCR_RETRY_DELAY_MS, 120_000),
   storageDriver: resolveStorageDriver(process.env.SUBMISSION_STORAGE_DRIVER),
+  triggerHost: process.env.OCR_TRIGGER_HOST?.trim() || "127.0.0.1",
+  triggerPort: parseNumber(process.env.OCR_TRIGGER_PORT, 4010),
   uploadsDir: path.resolve(
     process.cwd(),
     process.env.UPLOADS_DIR ?? "../api/uploads",
   ),
+  workerMode: resolveWorkerMode(process.env.OCR_WORKER_MODE),
 };

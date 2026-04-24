@@ -13,6 +13,7 @@ type ClaimedSubmission = {
 };
 
 const imageStore = createSubmissionImageStore();
+const triggeredJobs = new Set<Promise<void>>();
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => {
@@ -67,6 +68,30 @@ async function claimSubmissions(limit: number): Promise<ClaimedSubmission[]> {
       submission."ocrAttempts",
       submission."storagePath";
   `;
+}
+
+async function claimSubmissionById(
+  submissionId: string,
+): Promise<ClaimedSubmission | null> {
+  const claimed = await prisma.$queryRaw<ClaimedSubmission[]>`
+    UPDATE "Submission" AS submission
+    SET
+      "status" = 'processing'::"SubmissionStatus",
+      "ocrAttempts" = submission."ocrAttempts" + 1,
+      "ocrLastError" = NULL,
+      "nextOcrAttemptAt" = NULL
+    WHERE submission."id" = ${submissionId}
+      AND submission."status" = 'uploaded'::"SubmissionStatus"
+    RETURNING
+      submission."id",
+      submission."imageHeight",
+      submission."imageWidth",
+      submission."mimeType",
+      submission."ocrAttempts",
+      submission."storagePath";
+  `;
+
+  return claimed[0] ?? null;
 }
 
 async function handleClaimedSubmission(submission: ClaimedSubmission) {
@@ -135,10 +160,29 @@ async function handleClaimedSubmission(submission: ClaimedSubmission) {
   }
 }
 
+export async function triggerSubmissionOcr(submissionId: string) {
+  const claimedSubmission = await claimSubmissionById(submissionId);
+
+  if (!claimedSubmission) {
+    return false;
+  }
+
+  const job = handleClaimedSubmission(claimedSubmission).finally(() => {
+    triggeredJobs.delete(job);
+  });
+  triggeredJobs.add(job);
+
+  return true;
+}
+
+export async function waitForTriggeredOcr() {
+  await Promise.allSettled([...triggeredJobs]);
+}
+
 export async function runWorker(shouldStop: () => boolean) {
   console.info(
     [
-      `[ocr-worker] Starting with pollInterval=${config.pollIntervalMs}ms,`,
+      `[ocr-worker] Starting in ${config.workerMode} mode with pollInterval=${config.pollIntervalMs}ms,`,
       `batchSize=${config.claimBatchSize}, maxAttempts=${config.maxAttempts},`,
       `retryDelay=${config.retryDelayMs}ms,`,
       `storageDriver=${config.storageDriver}, ollamaBaseUrl=${config.ollamaBaseUrl.toString()}.`,

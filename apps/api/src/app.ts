@@ -81,6 +81,32 @@ function serializeSubmission(
   };
 }
 
+async function triggerWorkerOcr(submissionId: string) {
+  const response = await fetch(
+    `${config.ocrWorkerBaseUrl}/api/submissions/${encodeURIComponent(submissionId)}/ocr`,
+    {
+      method: "POST",
+    },
+  ).catch((error: unknown) => {
+    const message =
+      error instanceof Error ? error.message : "Unexpected worker request error.";
+    throw new HttpError(
+      503,
+      `Could not reach OCR worker at ${config.ocrWorkerBaseUrl}: ${message}`,
+    );
+  });
+
+  if (response.ok) {
+    return;
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | { error?: string }
+    | null;
+  const message = payload?.error ?? `OCR worker returned ${response.status}.`;
+  throw new HttpError(response.status === 409 ? 409 : 502, message);
+}
+
 export async function buildApp() {
   // Static file serving depends on the upload directory already existing.
   await ensureUploadsDir();
@@ -156,6 +182,88 @@ export async function buildApp() {
     }
 
     return serializeSubmission(submission);
+  });
+
+  // Local debugging helper: put a submission back into the worker queue after a
+  // terminal OCR result without requiring another upload.
+  app.post("/api/submissions/:id/reset-ocr", async (request) => {
+    const { id } = request.params as { id: string };
+    const existingSubmission = await prisma.submission.findUnique({
+      select: {
+        status: true,
+      },
+      where: {
+        id,
+      },
+    });
+
+    if (!existingSubmission) {
+      throw new HttpError(404, `Submission "${id}" was not found.`);
+    }
+
+    if (existingSubmission.status === "uploaded") {
+      throw new HttpError(
+        409,
+        `Submission "${id}" is already uploaded.`,
+      );
+    }
+
+    const submission = await prisma.submission.update({
+      data: {
+        correctedText: "",
+        ocrAttempts: 0,
+        ocrLastError: null,
+        ocrRawResponse: null,
+        overlays: [],
+        nextOcrAttemptAt: null,
+        processedAt: null,
+        status: "uploaded",
+      },
+      select: submissionResponseSelect,
+      where: {
+        id,
+      },
+    });
+
+    return serializeSubmission(submission);
+  });
+
+  app.post("/api/submissions/:id/run-ocr", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const existingSubmission = await prisma.submission.findUnique({
+      select: {
+        status: true,
+      },
+      where: {
+        id,
+      },
+    });
+
+    if (!existingSubmission) {
+      throw new HttpError(404, `Submission "${id}" was not found.`);
+    }
+
+    if (existingSubmission.status === "processing") {
+      throw new HttpError(409, `Submission "${id}" is already processing.`);
+    }
+
+    if (existingSubmission.status !== "uploaded") {
+      throw new HttpError(
+        409,
+        `Submission "${id}" must be reset before OCR can run again.`,
+      );
+    }
+
+    await triggerWorkerOcr(id);
+
+    const submission = await prisma.submission.findUniqueOrThrow({
+      select: submissionResponseSelect,
+      where: {
+        id,
+      },
+    });
+
+    return reply.code(202).send(serializeSubmission(submission));
   });
 
   // Accept one logical submission batch: a collection name plus one or more
