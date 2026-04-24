@@ -21,6 +21,18 @@ export async function getSubmissionById(
   return readJson<Submission>(response);
 }
 
+export async function resetSubmissionOcr(id: string): Promise<Submission> {
+  return fetchJson<Submission>(`/api/submissions/${id}/reset-ocr`, {
+    method: "POST",
+  });
+}
+
+export async function runSubmissionOcr(id: string): Promise<Submission> {
+  return fetchJson<Submission>(`/api/submissions/${id}/run-ocr`, {
+    method: "POST",
+  });
+}
+
 export async function listCollections(): Promise<string[]> {
   return fetchJson<string[]>("/api/collections", {
     cache: "no-store",

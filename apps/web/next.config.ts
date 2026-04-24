@@ -6,6 +6,7 @@ const apiBaseUrl = new URL(
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {

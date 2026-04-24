@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ResetOcrButton } from "@/features/submissions/reset-ocr-button";
+import { RunOcrButton } from "@/features/submissions/run-ocr-button";
 import { SubmissionStatusBadge } from "@/features/submissions/submission-status-badge";
 import { getSubmissionById } from "@/lib/api/submissions";
 import { formatDate } from "@/lib/utils/format-date";
@@ -13,6 +15,22 @@ type SubmissionDetailPageProps = {
     id: string;
   }>;
 };
+
+function JsonDebugBlock({ value }: { value: unknown }) {
+  return (
+    <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-[color:var(--surface-muted)] p-4 text-sm leading-6">
+      {JSON.stringify(value, null, 2)}
+    </pre>
+  );
+}
+
+function TextDebugBlock({ children }: { children: string }) {
+  return (
+    <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-[color:var(--surface-muted)] p-4 text-sm leading-6">
+      {children || "(empty)"}
+    </pre>
+  );
+}
 
 export default async function SubmissionDetailPage({
   params,
@@ -38,14 +56,21 @@ export default async function SubmissionDetailPage({
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-semibold">{submission.title}</h1>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted">
-          <SubmissionStatusBadge status={submission.status} />
-          <span>{submission.collectionName}</span>
-          <span>{submission.fileName}</span>
-          <span>{formatDate(submission.submittedAt)}</span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">{submission.title}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted">
+            <SubmissionStatusBadge status={submission.status} />
+            <span>{submission.collectionName}</span>
+            <span>{submission.fileName}</span>
+            <span>{formatDate(submission.submittedAt)}</span>
+          </div>
         </div>
+        {submission.status === "uploaded" ? (
+          <RunOcrButton submissionId={submission.id} />
+        ) : (
+          <ResetOcrButton submissionId={submission.id} />
+        )}
       </div>
 
       <Card>
@@ -69,6 +94,67 @@ export default async function SubmissionDetailPage({
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>OCR debug output</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <dt className="text-muted">Attempts</dt>
+              <dd className="font-medium">{submission.ocrAttempts}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Processed</dt>
+              <dd className="font-medium">
+                {submission.processedAt ? formatDate(submission.processedAt) : "-"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted">Next attempt</dt>
+              <dd className="font-medium">
+                {submission.nextOcrAttemptAt
+                  ? formatDate(submission.nextOcrAttemptAt)
+                  : "-"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted">Text length</dt>
+              <dd className="font-medium">{submission.correctedText.length}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Overlays</dt>
+              <dd className="font-medium">{submission.overlays.length}</dd>
+            </div>
+          </dl>
+
+          {submission.ocrLastError ? (
+            <section className="space-y-2">
+              <h2 className="text-lg font-semibold">Last error</h2>
+              <TextDebugBlock>{submission.ocrLastError}</TextDebugBlock>
+            </section>
+          ) : null}
+
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold">Raw Ollama response</h2>
+            <TextDebugBlock>
+              {submission.ocrRawResponse ??
+                "No raw Ollama response has been stored for this submission."}
+            </TextDebugBlock>
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold">Corrected text</h2>
+            <TextDebugBlock>{submission.correctedText}</TextDebugBlock>
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold">Overlays JSON</h2>
+            <JsonDebugBlock value={submission.overlays} />
+          </section>
         </CardContent>
       </Card>
     </div>

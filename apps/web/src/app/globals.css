@@ -37,6 +37,13 @@ a {
   text-decoration: none;
 }
 
+.button-primary-contrast,
+.button-primary-contrast:visited,
+.button-primary-contrast:hover,
+.button-primary-contrast:active {
+  color: var(--surface);
+}
+
 button,
 input,
 textarea,

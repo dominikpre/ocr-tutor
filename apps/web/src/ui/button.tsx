@@ -16,8 +16,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   ButtonClassNameOptions;
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    "border-black bg-black text-[color:var(--surface)] hover:bg-[#333333] hover:text-[color:var(--surface)] visited:text-[color:var(--surface)]",
+  primary: "border-black bg-black button-primary-contrast hover:bg-[#333333]",
   secondary: "bg-white text-foreground hover:bg-[color:var(--surface-muted)]",
   ghost: "border-transparent bg-transparent text-foreground hover:bg-[color:var(--surface-muted)]",
 };

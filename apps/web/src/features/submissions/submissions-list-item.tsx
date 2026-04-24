@@ -4,6 +4,7 @@ import type { Submission } from "@ocr-tutor/contracts";
 import { formatDate } from "@/lib/utils/format-date";
 import { buttonClassName } from "@/ui/button";
 import { Card } from "@/ui/card";
+import { RunOcrButton } from "@/features/submissions/run-ocr-button";
 import { SubmissionStatusBadge } from "@/features/submissions/submission-status-badge";
 
 type SubmissionsListItemProps = {
@@ -29,6 +30,9 @@ export function SubmissionsListItem({
 
           <div className="flex flex-wrap items-center gap-3">
             <SubmissionStatusBadge status={submission.status} />
+            {submission.status === "uploaded" ? (
+              <RunOcrButton submissionId={submission.id} />
+            ) : null}
             <Link href={`/submissions/${submission.id}`} className={buttonClassName()}>
               Open
             </Link>
