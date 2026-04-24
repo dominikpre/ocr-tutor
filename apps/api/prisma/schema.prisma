@@ -61,6 +61,8 @@ model Submission {
   ocrAttempts  Int              @default(0)
   // Most recent worker failure message, if any.
   ocrLastError String?
+  // Raw text returned by Ollama before parser cleanup, kept for debugging.
+  ocrRawResponse String?
   // Timestamp gating when this row becomes eligible for another OCR claim.
   nextOcrAttemptAt DateTime?
   // Timestamp when processing either succeeded or was terminally failed.

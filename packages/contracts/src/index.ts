@@ -33,6 +33,11 @@ export type Submission = {
   image: SubmissionImage;
   correctedText: string;
   overlays: SubmissionOverlay[];
+  ocrAttempts: number;
+  ocrLastError: string | null;
+  ocrRawResponse: string | null;
+  nextOcrAttemptAt: string | null;
+  processedAt: string | null;
 };
 
 export type UploadResponse = {

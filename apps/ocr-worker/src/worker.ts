@@ -1,5 +1,5 @@
 import { config } from "./config.js";
-import { extractOcrFromImage } from "./ollama.js";
+import { OcrOutputParseError, extractOcrFromImage } from "./ollama.js";
 import { prisma } from "./prisma.js";
 import { createSubmissionImageStore } from "./storage.js";
 
@@ -86,6 +86,7 @@ async function handleClaimedSubmission(submission: ClaimedSubmission) {
       data: {
         correctedText: ocrResult.correctedText,
         ocrLastError: null,
+        ocrRawResponse: ocrResult.rawResponse,
         overlays: JSON.parse(JSON.stringify(ocrResult.overlays)),
         nextOcrAttemptAt: null,
         processedAt: new Date(),
@@ -109,6 +110,9 @@ async function handleClaimedSubmission(submission: ClaimedSubmission) {
     await prisma.submission.update({
       data: {
         ocrLastError: errorMessage,
+        ...(error instanceof OcrOutputParseError
+          ? { ocrRawResponse: error.rawResponse }
+          : {}),
         nextOcrAttemptAt: nextAttemptAt,
         processedAt: shouldMarkFailed ? new Date() : null,
         status: shouldMarkFailed ? "failed" : "uploaded",

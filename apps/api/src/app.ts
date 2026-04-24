@@ -36,6 +36,11 @@ const submissionResponseSelect = {
   imageHeight: true,
   correctedText: true,
   overlays: true,
+  ocrAttempts: true,
+  ocrLastError: true,
+  ocrRawResponse: true,
+  nextOcrAttemptAt: true,
+  processedAt: true,
   submittedAt: true,
   collection: {
     select: {
@@ -68,6 +73,11 @@ function serializeSubmission(
     overlays: Array.isArray(submission.overlays)
       ? (submission.overlays as Submission["overlays"])
       : [],
+    ocrAttempts: submission.ocrAttempts,
+    ocrLastError: submission.ocrLastError,
+    ocrRawResponse: submission.ocrRawResponse,
+    nextOcrAttemptAt: submission.nextOcrAttemptAt?.toISOString() ?? null,
+    processedAt: submission.processedAt?.toISOString() ?? null,
   };
 }
 

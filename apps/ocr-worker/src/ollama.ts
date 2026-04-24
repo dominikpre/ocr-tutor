@@ -5,12 +5,22 @@ import { config } from "./config.js";
 type OcrResult = {
   correctedText: string;
   overlays: SubmissionOverlay[];
+  rawResponse: string;
 };
 
 type OllamaGenerateResponse = {
   error?: string;
   response?: string;
 };
+
+export class OcrOutputParseError extends Error {
+  rawResponse: string;
+
+  constructor(message: string, rawResponse: string) {
+    super(message);
+    this.rawResponse = rawResponse;
+  }
+}
 
 function asNumber(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -110,11 +120,17 @@ function parseOcrResult(
   try {
     parsed = JSON.parse(rawResponse);
   } catch {
-    throw new Error(`Ollama response was not valid JSON: "${rawResponse}".`);
+    throw new OcrOutputParseError(
+      `Ollama response was not valid JSON: "${rawResponse}".`,
+      rawResponse,
+    );
   }
 
   if (typeof parsed !== "object" || parsed === null) {
-    throw new Error("Ollama response JSON must be an object.");
+    throw new OcrOutputParseError(
+      "Ollama response JSON must be an object.",
+      rawResponse,
+    );
   }
 
   const result = parsed as {
@@ -136,6 +152,7 @@ function parseOcrResult(
   return {
     correctedText,
     overlays,
+    rawResponse,
   };
 }
 
